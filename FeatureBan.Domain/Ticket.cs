@@ -6,5 +6,6 @@ namespace FeatureBan.Domain
     {
         public string Name { get; set; }
         public Stage Stage { get; private set; }
+        public bool IsAssigned { get; set; }
     }
 }

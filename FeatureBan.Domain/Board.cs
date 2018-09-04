@@ -6,13 +6,15 @@ namespace FeatureBan.Domain
 {
     public class Board
     {
-        public Ticket GetOpenTicket()
+        public virtual Ticket GetOpenTicket()
         {
             return new Ticket();
         }
 
         public void MoveTicketForward(Ticket ticket)
         {
+            if (!ticket.IsAssigned)
+                throw new InvalidOperationException();
         }
 
         public Ticket GetTicketByName(string name)
