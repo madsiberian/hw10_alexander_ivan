@@ -1,5 +1,4 @@
 using System;
-using Moq;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -9,12 +8,12 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void MoveTicketForward_ChangesTicketStageFromOpenToWip1_WhenTicketIsOpen()
         {
-            var board = new Mock<Board>();
-            board.Setup(x => x.GetOpenTicket()).Returns(new Ticket { IsAssigned = true });
-            var openTicket = board.Object.GetOpenTicket();
+            var board = new Board();
+            var openTicket = board.GetOpenTicket();
+            board.AssignTicket(openTicket);
 
-            board.Object.MoveTicketForward(openTicket);
-            var wipTicket = board.Object.GetTicketByName(openTicket.Name);
+            board.MoveTicketForward(openTicket);
+            var wipTicket = board.GetTicketByName(openTicket.Name);
 
             Assert.Equal(openTicket.Name, wipTicket.Name);
             Assert.Equal(Stage.WIP1, wipTicket.Stage);
@@ -27,6 +26,19 @@ namespace FeatureBan.Domain.Tests
             var unassignedTicket = board.GetOpenTicket();
 
             Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(unassignedTicket));
+        }
+
+        [Fact]
+        public void AssignTicket_SetsIsAssignedToTrue()
+        {
+            var board = new Board();
+            var unassignedTicket = board.GetOpenTicket();
+
+            board.AssignTicket(unassignedTicket);
+            var assignedTicket = board.GetTicketByName(unassignedTicket.Name);
+
+            Assert.True(assignedTicket.IsAssigned);
+            Assert.Equal(unassignedTicket.Name, assignedTicket.Name);
         }
     }
 }
