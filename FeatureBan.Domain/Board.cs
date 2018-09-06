@@ -19,6 +19,8 @@ namespace FeatureBan.Domain
         {
             if (!ticket.IsAssigned)
                 throw new InvalidOperationException();
+            if (ticket.IsBlocked)
+                throw new InvalidOperationException();
 
             ticket.Stage = GetNextStage(ticket.Stage);
         }

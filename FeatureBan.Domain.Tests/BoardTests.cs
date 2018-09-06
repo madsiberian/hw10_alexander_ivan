@@ -29,6 +29,18 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsBlocked()
+        {
+            var board = new Board();
+            var ticket = board.GetOpenTicket();
+            board.AssignTicket(ticket);
+            board.MoveTicketForward(ticket);
+            board.BlockTicket(ticket);
+
+            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(ticket));
+        }
+
+        [Fact]
         public void AssignTicket_SetsIsAssignedToTrue()
         {
             var board = new Board();
@@ -98,6 +110,5 @@ namespace FeatureBan.Domain.Tests
 
             Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
         }
-
     }
 }
