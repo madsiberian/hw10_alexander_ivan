@@ -40,5 +40,15 @@ namespace FeatureBan.Domain.Tests
             Assert.True(assignedTicket.IsAssigned);
             Assert.Equal(unassignedTicket.Name, assignedTicket.Name);
         }
+
+        [Fact]
+        public void AssignTicket_ThrowsInvalidOperationException_WhenTicketIsAlreadyAssigned()
+        {
+            var board = new Board();
+            var ticket = board.GetOpenTicket();
+            board.AssignTicket(ticket);
+
+            Assert.Throws<InvalidOperationException>(() => board.AssignTicket(ticket));
+        }
     }
 }

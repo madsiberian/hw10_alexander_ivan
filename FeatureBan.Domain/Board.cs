@@ -29,6 +29,9 @@ namespace FeatureBan.Domain
 
         public void AssignTicket(Ticket ticket)
         {
+            if (ticket.IsAssigned)
+                throw new InvalidOperationException();
+
             ticket.IsAssigned = true;
         }
     }
