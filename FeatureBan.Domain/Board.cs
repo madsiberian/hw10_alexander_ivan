@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FeatureBan.Domain
 {
@@ -33,6 +32,11 @@ namespace FeatureBan.Domain
                 throw new InvalidOperationException();
 
             ticket.IsAssigned = true;
+        }
+
+        public void BlockTicket(Ticket ticket)
+        {
+            ticket.IsBlocked = true;
         }
     }
 }
