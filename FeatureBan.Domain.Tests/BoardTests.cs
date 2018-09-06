@@ -1,4 +1,5 @@
 using System;
+using FeatureBan.Domain.Tests.DSL;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -32,10 +33,7 @@ namespace FeatureBan.Domain.Tests
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsBlocked()
         {
             var board = new Board();
-            var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket);
-            board.MoveTicketForward(ticket);
-            board.BlockTicket(ticket);
+            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Blocked().Please();
 
             Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(ticket));
         }
@@ -57,8 +55,7 @@ namespace FeatureBan.Domain.Tests
         public void AssignTicket_ThrowsInvalidOperationException_WhenTicketIsAlreadyAssigned()
         {
             var board = new Board();
-            var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket);
+            var ticket = Create.Ticket().Assigned().Please();
 
             Assert.Throws<InvalidOperationException>(() => board.AssignTicket(ticket));
         }
@@ -67,9 +64,7 @@ namespace FeatureBan.Domain.Tests
         public void BlockTicket_SetsIsBlockedToTrue()
         {
             var board = new Board();
-            var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket);
-            board.MoveTicketForward(ticket);
+            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Please();
 
             board.BlockTicket(ticket);
 
@@ -89,11 +84,7 @@ namespace FeatureBan.Domain.Tests
         public void BlockTicket_ThrowsInvalidOperationException_WhenTicketIsDone()
         {
             var board = new Board();
-            var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket);
-            board.MoveTicketForward(ticket);
-            board.MoveTicketForward(ticket);
-            board.MoveTicketForward(ticket);
+            var ticket = Create.Ticket().OnStage(Stage.Done).Assigned().Please();
 
             Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
         }
