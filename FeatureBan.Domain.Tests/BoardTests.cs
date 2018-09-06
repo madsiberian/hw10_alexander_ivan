@@ -56,10 +56,35 @@ namespace FeatureBan.Domain.Tests
         {
             var board = new Board();
             var ticket = board.GetOpenTicket();
+            board.AssignTicket(ticket);
+            board.MoveTicketForward(ticket);
 
             board.BlockTicket(ticket);
 
             Assert.True(ticket.IsBlocked);
         }
+
+        [Fact]
+        public void BlockTicket_ThrowsInvalidOperationException_WhenTicketIsOpen()
+        {
+            var board = new Board();
+            var openTicket = board.GetOpenTicket();
+
+            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(openTicket));
+        }
+
+        [Fact]
+        public void BlockTicket_ThrowsInvalidOperationException_WhenTicketIsDone()
+        {
+            var board = new Board();
+            var ticket = board.GetOpenTicket();
+            board.AssignTicket(ticket);
+            board.MoveTicketForward(ticket);
+            board.MoveTicketForward(ticket);
+            board.MoveTicketForward(ticket);
+
+            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
+        }
+
     }
 }

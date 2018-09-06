@@ -2,6 +2,9 @@ namespace FeatureBan.Domain
 {
     public enum Stage
     {
-        WIP1
+        Open,
+        WIP1,
+        WIP2,
+        Done,
     }
 }

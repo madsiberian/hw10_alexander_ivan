@@ -19,6 +19,23 @@ namespace FeatureBan.Domain
         {
             if (!ticket.IsAssigned)
                 throw new InvalidOperationException();
+
+            ticket.Stage = GetNextStage(ticket.Stage);
+        }
+
+        private Stage GetNextStage(Stage ticketStage)
+        {
+            switch (ticketStage)
+            {
+                case Stage.Open:
+                    return Stage.WIP1;
+                case Stage.WIP1:
+                    return Stage.WIP2;
+                case Stage.WIP2:
+                    return Stage.Done;
+                default:
+                    throw new ArgumentException();
+            }
         }
 
         public Ticket GetTicketByName(string name)
@@ -36,6 +53,9 @@ namespace FeatureBan.Domain
 
         public void BlockTicket(Ticket ticket)
         {
+            if (ticket.Stage == Stage.Open || ticket.Stage == Stage.Done)
+                throw new InvalidOperationException();
+
             ticket.IsBlocked = true;
         }
     }
