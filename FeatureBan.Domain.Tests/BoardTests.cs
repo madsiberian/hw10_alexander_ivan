@@ -86,5 +86,18 @@ namespace FeatureBan.Domain.Tests
             Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
         }
 
+        [Fact]
+        public void BlockTicket_ThrowsInvalidOperationException_IfWeTryBlockAgain()
+        {
+            var board = new Board();
+            var ticket = board.GetOpenTicket();
+            board.AssignTicket(ticket);
+            board.MoveTicketForward(ticket);
+
+            board.BlockTicket(ticket);
+
+            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
+        }
+
     }
 }

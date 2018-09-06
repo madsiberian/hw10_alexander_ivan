@@ -53,6 +53,8 @@ namespace FeatureBan.Domain
 
         public void BlockTicket(Ticket ticket)
         {
+            if (ticket.IsBlocked) throw new InvalidOperationException();
+
             if (ticket.Stage == Stage.Open || ticket.Stage == Stage.Done)
                 throw new InvalidOperationException();
 
