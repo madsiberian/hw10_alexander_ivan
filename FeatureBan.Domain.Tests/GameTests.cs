@@ -68,12 +68,12 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenTicketIsNotOpen()
         {
-            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
-            var game = Create.Game().WithPlayers(players).Please();
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().WithPlayers(player).Please();
             var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
-            Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(ticketInWork, players.Last()));
+            Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(ticketInWork, player));
         }
 
         [Fact]
@@ -84,6 +84,33 @@ namespace FeatureBan.Domain.Tests
             var openTicket = game.GetOpenTickets().First();
 
             Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(openTicket, player));
+        }
+
+        [Fact]
+        public void MoveTicketForward_ChangesTicketStageToWip2_WhenTicketStageIsWip1()
+        {
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().WithPlayers(player).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+
+            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+
+            wip2Ticket.Stage.Should().Be(Stage.WIP2);
+        }
+
+        [Fact]
+        public void MoveTicketForward_ChangesTicketStageToDone_WhenTicketStageIsWip2()
+        {
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().WithPlayers(player).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+            
+            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
+
+            doneTicket.Stage.Should().Be(Stage.Done);
         }
     }
 }

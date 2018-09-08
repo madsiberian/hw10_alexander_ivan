@@ -42,5 +42,12 @@ namespace FeatureBan.Domain
 
             return openTicket;
         }
+
+        public Ticket MoveTicketForward(Ticket ticket, Player player)
+        {
+            _board.MoveTicketForward(ticket);
+
+            return ticket;
+        }
     }
 }
