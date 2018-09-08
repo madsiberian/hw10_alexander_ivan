@@ -214,5 +214,30 @@ namespace FeatureBan.Domain.Tests
 
             unblockedTicket.Should().BeEquivalentTo(ticketInWork);
         }
+
+        [Fact]
+        public void UnblockTicket_ThrowInvalidOperation_WhenTicketInUnblocked()
+        {
+            var player = Fixture.Create<Player>();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+
+            Assert.Throws<InvalidOperationException>(() => game.UnblockTicket(ticketInWork, player));
+        }
+
+        [Fact]
+        public void UnblockTicket_ThrowInvalidOperation_WhenAnotherPlayerTryUnblockTicket()
+        {
+            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(players).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
+            game.BlockTicketAndGetNew(ticketInWork, players.First());
+
+            Assert.Throws<InvalidOperationException>(() => game.UnblockTicket(ticketInWork, players.Last()));
+        }
     }
 }

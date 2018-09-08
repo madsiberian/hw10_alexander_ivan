@@ -66,6 +66,9 @@ namespace FeatureBan.Domain
 
         public Ticket UnblockTicket(Ticket ticket, Player player)
         {
+            if (ticket.AssigneeName != player.Name)
+                throw new InvalidOperationException();
+
             _board.UnblockTicket(ticket);
             return ticket;
         }
