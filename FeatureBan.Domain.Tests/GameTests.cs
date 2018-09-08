@@ -1,7 +1,8 @@
-﻿using System;
-using System.Linq;
-using AutoFixture;
+﻿using AutoFixture;
 using FeatureBan.Domain.Tests.DSL;
+using System;
+using System.Linq;
+using FluentAssertions;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -37,6 +38,17 @@ namespace FeatureBan.Domain.Tests
             var game = Create.Game().WithMaxPlayers(3).WithPlayers(players).Please();
 
             Assert.Throws<InvalidOperationException>(() => game.AddPlayer(new Player("extra player")));
+        }
+
+        [Fact]
+        public void GetOpenTickets_ReturnsOpenTickets()
+        {
+            var game = Create.Game().Please();
+
+            var tickets = game.GetOpenTickets();
+
+            tickets.Should().NotBeEmpty();
+            tickets.Should().NotContain(t => t.Stage != Stage.Open);
         }
     }
 }

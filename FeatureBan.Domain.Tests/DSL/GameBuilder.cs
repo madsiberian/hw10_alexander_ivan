@@ -5,7 +5,7 @@ namespace FeatureBan.Domain.Tests.DSL
     public class GameBuilder
     {
         private int _maxPlayerCount = 5;
-        private IEnumerable<Player> _players;
+        private IEnumerable<Player> _players = new List<Player>();
 
         public GameBuilder WithMaxPlayers(int maxPlayerCount)
         {

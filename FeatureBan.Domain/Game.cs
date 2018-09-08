@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,6 +25,11 @@ namespace FeatureBan.Domain
                 throw new InvalidOperationException();
 
             _players.Add(player);
+        }
+
+        public IReadOnlyList<Ticket> GetOpenTickets()
+        {
+            return new List<Ticket>{new Ticket()};
         }
     }
 }
