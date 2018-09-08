@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FeatureBan.Domain
+﻿namespace FeatureBan.Domain
 {
     public class Player
     {
+        public Player(string id)
+        {
+            Id = id;
+        }
+
+        public string Id { get; }
     }
 }

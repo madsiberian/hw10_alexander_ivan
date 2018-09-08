@@ -11,7 +11,7 @@ namespace FeatureBan.Domain.Tests
         public void AddPlayer_ThenCountOfPlayersShouldIncrement()
         {
             var game = new Game();
-            var player = new Player();
+            var player = new Player("foo");
             var countOfPlayersInGame = game.CountOfPlayers;
 
             game.AddPlayer(player);
