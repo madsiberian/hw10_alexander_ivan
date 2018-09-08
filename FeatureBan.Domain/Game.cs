@@ -45,6 +45,9 @@ namespace FeatureBan.Domain
 
         public Ticket MoveTicketForward(Ticket ticket, Player player)
         {
+            if (ticket.Assignee != player.Name)
+                throw new InvalidOperationException();
+
             _board.MoveTicketForward(ticket);
 
             return ticket;

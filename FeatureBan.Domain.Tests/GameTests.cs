@@ -112,5 +112,16 @@ namespace FeatureBan.Domain.Tests
 
             doneTicket.Stage.Should().Be(Stage.Done);
         }
+
+        [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsAssignedToOtherPlayer()
+        {
+            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
+            var game = Create.Game().WithPlayers(players).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
+
+            Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(ticketInWork, players.Last()));
+        }
     }
 }
