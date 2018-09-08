@@ -92,6 +92,31 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
+        public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenPlayerMadeHisMove()
+        {
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().WithPlayers(player).WithFakeBoard().Please();
+            var openTickets = game.GetOpenTickets().Take(2).ToArray();
+            game.StartProgressOnTicket(openTickets.First(), player);
+
+            Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(openTickets.Last(), player));
+        }
+
+        [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenPlayerMadeHisMove()
+        {
+            var player = new Player("Player");
+            var board = Create.Board().AsWritten(@"
+                | Open   | Dev | Test | Done |
+                |[Ticket]|     |      |      |");
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().Single();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+
+            Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(ticketInWork, player));
+        }
+
+        [Fact]
         public void MoveTicketForward_ChangesTicketStageToTest_WhenTicketStageIsDev()
         {
             var player = new Player("Player");
@@ -109,7 +134,7 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void MoveTicketForward_ChangesTicketStageToDone_WhenTicketStageIsTest()
         {
-            var player = Fixture.Create<Player>();
+            var player = new Player("Player");
             var board = Create.Board().AsWritten(@"
                 | Open | Dev | Test              | Done |
                 |      |     | [Ticket > Player] |      |");

@@ -8,6 +8,7 @@ namespace FeatureBan.Domain
     {
         private readonly IBoard _board;
         private readonly IList<Player> _players = new List<Player>();
+        private readonly HashSet<string> _playersThatMadeMove = new HashSet<string>();
         private readonly int _maxPlayerCount;
 
         public Game(IBoard board, int maxPlayerCount = 5)
@@ -36,10 +37,14 @@ namespace FeatureBan.Domain
         public Ticket StartProgressOnTicket(Ticket openTicket, Player player)
         {
             if (_players.All(x => x.Name != player.Name))
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"player {player.Name} not in game");
+            if (_playersThatMadeMove.Contains(player.Name))
+                throw new InvalidOperationException($"player {player.Name} already made his move");
 
             _board.AssignTicket(openTicket, player.Name);
             _board.MoveTicketForward(openTicket);
+
+            _playersThatMadeMove.Add(player.Name);
 
             return openTicket;
         }
@@ -48,8 +53,12 @@ namespace FeatureBan.Domain
         {
             if (ticket.AssigneeName != player.Name)
                 throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
+            if (_playersThatMadeMove.Contains(player.Name))
+                throw new InvalidOperationException($"player {player.Name} already made his move");
 
             _board.MoveTicketForward(ticket);
+
+            _playersThatMadeMove.Add(player.Name);
 
             return ticket;
         }
