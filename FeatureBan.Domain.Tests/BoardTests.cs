@@ -112,5 +112,14 @@ namespace FeatureBan.Domain.Tests
 
             Assert.False(ticket.IsBlocked);
         }
+
+        [Fact]
+        public void UnblockTicket_ThrowsInvalidOperationException_WhenTicketIsNotBlocked()
+        {
+            var board = new Board();
+            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Please();
+
+            Assert.Throws<InvalidOperationException>(() => board.UnblockTicket(ticket));
+        }
     }
 }
