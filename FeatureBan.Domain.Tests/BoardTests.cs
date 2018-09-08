@@ -1,5 +1,5 @@
-using System;
 using FeatureBan.Domain.Tests.DSL;
+using System;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -100,6 +100,17 @@ namespace FeatureBan.Domain.Tests
             board.BlockTicket(ticket);
 
             Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
+        }
+
+        [Fact]
+        public void UnblockTicket_SetsIsBlockedToFalse()
+        {
+            var board = new Board();
+            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Blocked().Please();
+
+            board.UnblockTicket(ticket);
+
+            Assert.False(ticket.IsBlocked);
         }
     }
 }

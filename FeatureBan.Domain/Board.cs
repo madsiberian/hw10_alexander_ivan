@@ -62,5 +62,10 @@ namespace FeatureBan.Domain
 
             ticket.IsBlocked = true;
         }
+
+        public void UnblockTicket(Ticket ticket)
+        {
+            ticket.IsBlocked = false;
+        }
     }
 }
