@@ -45,12 +45,13 @@ namespace FeatureBan.Domain
             return _tickets.FirstOrDefault(x => x.Name == name);
         }
 
-        public void AssignTicket(Ticket ticket)
+        public void AssignTicket(Ticket ticket, string playerId)
         {
             if (ticket.IsAssigned)
                 throw new InvalidOperationException();
 
             ticket.IsAssigned = true;
+            ticket.Assignee = playerId;
         }
 
         public void BlockTicket(Ticket ticket)

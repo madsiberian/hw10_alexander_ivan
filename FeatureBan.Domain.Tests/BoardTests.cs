@@ -4,14 +4,14 @@ using Xunit;
 
 namespace FeatureBan.Domain.Tests
 {
-    public class BoardTests
+    public class BoardTests : TestBase
     {
         [Fact]
         public void MoveTicketForward_ChangesTicketStageFromOpenToWip1_WhenTicketIsOpen()
         {
             var board = new Board();
             var openTicket = board.GetOpenTicket();
-            board.AssignTicket(openTicket);
+            board.AssignTicket(openTicket, "some player");
 
             board.MoveTicketForward(openTicket);
             var wipTicket = board.GetTicketByName(openTicket.Name);
@@ -44,7 +44,7 @@ namespace FeatureBan.Domain.Tests
             var board = new Board();
             var unassignedTicket = board.GetOpenTicket();
 
-            board.AssignTicket(unassignedTicket);
+            board.AssignTicket(unassignedTicket, "some player");
             var assignedTicket = board.GetTicketByName(unassignedTicket.Name);
 
             Assert.True(assignedTicket.IsAssigned);
@@ -57,7 +57,7 @@ namespace FeatureBan.Domain.Tests
             var board = new Board();
             var ticket = Create.Ticket().Assigned().Please();
 
-            Assert.Throws<InvalidOperationException>(() => board.AssignTicket(ticket));
+            Assert.Throws<InvalidOperationException>(() => board.AssignTicket(ticket, "some player"));
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace FeatureBan.Domain.Tests
         {
             var board = new Board();
             var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket);
+            board.AssignTicket(ticket, "some player");
             board.MoveTicketForward(ticket);
 
             board.BlockTicket(ticket);

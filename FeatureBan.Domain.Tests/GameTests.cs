@@ -50,5 +50,19 @@ namespace FeatureBan.Domain.Tests
             tickets.Should().NotBeEmpty();
             tickets.Should().NotContain(t => t.Stage != Stage.Open);
         }
+
+        [Fact]
+        public void StartProgress_AssignsAndMovesTicket()
+        {
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().WithPlayers(player).Please();
+            var openTicket = game.GetOpenTickets().First();
+
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+
+            Assert.Equal(openTicket.Name, ticketInWork.Name);
+            Assert.Equal(Stage.WIP1, ticketInWork.Stage);
+            Assert.Equal(ticketInWork.Assignee, player.Id);
+        }
     }
 }

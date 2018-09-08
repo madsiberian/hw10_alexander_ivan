@@ -1,4 +1,6 @@
-﻿namespace FeatureBan.Domain
+﻿using System.Collections.Generic;
+
+namespace FeatureBan.Domain
 {
     public class Ticket
     {
@@ -6,5 +8,6 @@
         public Stage Stage { get; set; }
         public bool IsAssigned { get; set; }
         public bool IsBlocked { get; set; }
+        public string Assignee { get; set; }
     }
 }

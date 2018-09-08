@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace FeatureBan.Domain
 {
     public class Game
     {
+        private readonly Board _board = new Board();
         private readonly IList<Player> _players = new List<Player>();
         private readonly int _maxPlayerCount;
 
@@ -30,6 +32,14 @@ namespace FeatureBan.Domain
         public IReadOnlyList<Ticket> GetOpenTickets()
         {
             return new List<Ticket>{new Ticket()};
+        }
+
+        public Ticket StartProgressOnTicket(Ticket openTicket, Player player)
+        {
+            _board.AssignTicket(openTicket, player.Id);
+            _board.MoveTicketForward(openTicket);
+
+            return openTicket;
         }
     }
 }
