@@ -64,7 +64,7 @@ namespace FeatureBan.Domain.Tests
 
             Assert.Equal(openTicket.Name, ticketInWork.Name);
             Assert.Equal(Stage.WIP1, ticketInWork.Stage);
-            Assert.Equal(ticketInWork.Assignee, player.Name);
+            Assert.Equal(ticketInWork.AssigneeName, player.Name);
         }
 
         [Fact]
@@ -119,6 +119,20 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsDone()
+        {
+            var player = Fixture.Create<Player>();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
+
+            Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(doneTicket, player));
+        }
+
+        [Fact]
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsAssignedToOtherPlayer()
         {
             var players = Fixture.CreateMany<Player>().Take(2).ToArray();
@@ -131,17 +145,20 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
-        public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsDone()
+        public void BlockTicketAndGetNew_BlocksTicketAndAssignsNewTicket()
         {
             var player = Fixture.Create<Player>();
             var board = Create.Board().Please();
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
-            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
 
-            Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(doneTicket, player));
+            Ticket assignedTicket = game.BlockTicketAndGetNew(ticketInWork, player);
+
+            ticketInWork.IsBlocked.Should().BeTrue();
+            assignedTicket.Stage.Should().Be(Stage.Open);
+            assignedTicket.AssigneeName.Should().Be(player.Name);
+            assignedTicket.IsBlocked.Should().BeFalse();
         }
     }
 }

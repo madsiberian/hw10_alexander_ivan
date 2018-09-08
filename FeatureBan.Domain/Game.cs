@@ -46,12 +46,22 @@ namespace FeatureBan.Domain
 
         public Ticket MoveTicketForward(Ticket ticket, Player player)
         {
-            if (ticket.Assignee != player.Name)
+            if (ticket.AssigneeName != player.Name)
                 throw new InvalidOperationException();
 
             _board.MoveTicketForward(ticket);
 
             return ticket;
+        }
+
+        public Ticket BlockTicketAndGetNew(Ticket ticket, Player player)
+        {
+            _board.BlockTicket(ticket);
+
+            var assignedTicket = _board.GetOpenTicket();
+            _board.AssignTicket(assignedTicket, player.Name);
+
+            return assignedTicket;
         }
     }
 }

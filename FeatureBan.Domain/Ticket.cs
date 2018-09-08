@@ -8,6 +8,6 @@ namespace FeatureBan.Domain
         public Stage Stage { get; set; }
         public bool IsAssigned { get; set; }
         public bool IsBlocked { get; set; }
-        public string Assignee { get; set; }
+        public string AssigneeName { get; set; }
     }
 }

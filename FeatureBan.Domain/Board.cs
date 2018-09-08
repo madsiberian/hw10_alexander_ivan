@@ -60,7 +60,7 @@ namespace FeatureBan.Domain
                 throw new InvalidOperationException();
 
             ticket.IsAssigned = true;
-            ticket.Assignee = playerId;
+            ticket.AssigneeName = playerId;
         }
 
         public void BlockTicket(Ticket ticket)
