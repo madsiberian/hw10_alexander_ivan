@@ -63,5 +63,11 @@ namespace FeatureBan.Domain
 
             return assignedTicket;
         }
+
+        public Ticket UnblockTicket(Ticket ticket, Player player)
+        {
+            _board.UnblockTicket(ticket);
+            return ticket;
+        }
     }
 }

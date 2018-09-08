@@ -166,7 +166,7 @@ namespace FeatureBan.Domain.Tests
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
-            Ticket assignedTicket = game.BlockTicketAndGetNew(ticketInWork, player);
+            var assignedTicket = game.BlockTicketAndGetNew(ticketInWork, player);
 
             ticketInWork.IsBlocked.Should().BeTrue();
             assignedTicket.Stage.Should().Be(Stage.Open);
@@ -198,6 +198,21 @@ namespace FeatureBan.Domain.Tests
             game.BlockTicketAndGetNew(ticketInWork, players.First());
 
             Assert.Throws<InvalidOperationException>(() => game.BlockTicketAndGetNew(ticketInWork, players.Last()));
+        }
+
+        [Fact]
+        public void UnblockTicket()
+        {
+            var player = Fixture.Create<Player>();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+            game.BlockTicketAndGetNew(ticketInWork, player);
+
+            var unblockedTicket = game.UnblockTicket(ticketInWork, player);
+
+            unblockedTicket.Should().BeEquivalentTo(ticketInWork);
         }
     }
 }
