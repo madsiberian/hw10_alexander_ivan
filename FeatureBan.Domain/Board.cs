@@ -4,14 +4,20 @@ using System.Linq;
 
 namespace FeatureBan.Domain
 {
-    public class Board
+    public class Board : IBoard
     {
-        private readonly IList<Ticket> _tickets = new List<Ticket>();
+        private readonly IDictionary<string, Ticket> _tickets = new Dictionary<string, Ticket>();
+        private readonly ITicketService _ticketService;
+
+        public Board(ITicketService ticketService)
+        {
+            _ticketService = ticketService;
+        }
 
         public Ticket GetOpenTicket()
         {
-            var ticket = new Ticket();
-            _tickets.Add(ticket);
+            var ticket = _ticketService.CreateTicket();
+            _tickets.Add(ticket.Name, ticket);
             return ticket;
         }
 
@@ -21,8 +27,11 @@ namespace FeatureBan.Domain
                 throw new InvalidOperationException();
             if (ticket.IsBlocked)
                 throw new InvalidOperationException();
+            if (ticket.Stage == Stage.Done)
+                throw new InvalidOperationException();
 
             ticket.Stage = GetNextStage(ticket.Stage);
+            _tickets[ticket.Name] = ticket;
         }
 
         private Stage GetNextStage(Stage ticketStage)
@@ -42,7 +51,7 @@ namespace FeatureBan.Domain
 
         public Ticket GetTicketByName(string name)
         {
-            return _tickets.FirstOrDefault(x => x.Name == name);
+            return _tickets.FirstOrDefault(x => x.Key == name).Value;
         }
 
         public void AssignTicket(Ticket ticket, string playerId)

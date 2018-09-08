@@ -6,13 +6,14 @@ namespace FeatureBan.Domain
 {
     public class Game
     {
-        private readonly Board _board = new Board();
+        private readonly IBoard _board;
         private readonly IList<Player> _players = new List<Player>();
         private readonly int _maxPlayerCount;
 
-        public Game(int maxPlayerCount = 5)
+        public Game(IBoard board, int maxPlayerCount = 5)
         {
-            this._maxPlayerCount = maxPlayerCount;
+            _board = board;
+            _maxPlayerCount = maxPlayerCount;
         }
 
         public int CountOfPlayers => _players.Count;
@@ -29,7 +30,7 @@ namespace FeatureBan.Domain
 
         public IReadOnlyList<Ticket> GetOpenTickets()
         {
-            return new List<Ticket>{new Ticket()};
+            return new List<Ticket>{new Ticket() { Name = "ticket name" }};
         }
 
         public Ticket StartProgressOnTicket(Ticket openTicket, Player player)

@@ -15,5 +15,10 @@ namespace FeatureBan.Domain.Tests.DSL
         {
             return new GameBuilder();
         }
+
+        public static BoardBuilder Board()
+        {
+            return new BoardBuilder();
+        }
     }
 }

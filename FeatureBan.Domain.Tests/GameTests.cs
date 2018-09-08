@@ -3,6 +3,7 @@ using FeatureBan.Domain.Tests.DSL;
 using FluentAssertions;
 using System;
 using System.Linq;
+using Moq;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -12,7 +13,7 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void AddPlayer_ThenCountOfPlayersShouldIncrement()
         {
-            var game = new Game();
+            var game = Create.Game().WithFakeBoard().Please();
             var player = new Player("foo");
             var countOfPlayersInGame = game.CountOfPlayers;
 
@@ -24,7 +25,7 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void AddPlayer_ThrowsInvalidOperationException_WhenPlayerIsAlreadyInGame()
         {
-            var game = new Game();
+            var game = Create.Game().WithFakeBoard().Please();
             var player = new Player("foo");
             game.AddPlayer(player);
 
@@ -35,7 +36,7 @@ namespace FeatureBan.Domain.Tests
         public void AddPlayer_ThrowsInvalidOperationException_WhenMaxPlayerCountExceeded()
         {
             var players = Fixture.CreateMany<Player>().Take(3).ToArray();
-            var game = Create.Game().WithMaxPlayers(3).WithPlayers(players).Please();
+            var game = Create.Game().WithFakeBoard().WithMaxPlayers(3).WithPlayers(players).Please();
 
             Assert.Throws<InvalidOperationException>(() => game.AddPlayer(new Player("extra player")));
         }
@@ -55,7 +56,8 @@ namespace FeatureBan.Domain.Tests
         public void StartProgressOnTicket_AssignsAndMovesTicket()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().WithPlayers(player).Please();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
 
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
@@ -69,7 +71,8 @@ namespace FeatureBan.Domain.Tests
         public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenTicketIsNotOpen()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().WithPlayers(player).Please();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
@@ -90,7 +93,8 @@ namespace FeatureBan.Domain.Tests
         public void MoveTicketForward_ChangesTicketStageToWip2_WhenTicketStageIsWip1()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().WithPlayers(player).Please();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
@@ -103,7 +107,8 @@ namespace FeatureBan.Domain.Tests
         public void MoveTicketForward_ChangesTicketStageToDone_WhenTicketStageIsWip2()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().WithPlayers(player).Please();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
             var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
@@ -117,11 +122,26 @@ namespace FeatureBan.Domain.Tests
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsAssignedToOtherPlayer()
         {
             var players = Fixture.CreateMany<Player>().Take(2).ToArray();
-            var game = Create.Game().WithPlayers(players).Please();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(players).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
 
             Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(ticketInWork, players.Last()));
+        }
+
+        [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsDone()
+        {
+            var player = Fixture.Create<Player>();
+            var board = Create.Board().Please();
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
+
+            Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(doneTicket, player));
         }
     }
 }
