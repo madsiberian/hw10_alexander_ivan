@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace FeatureBan.Domain
 {
@@ -21,7 +19,7 @@ namespace FeatureBan.Domain
 
         public void AddPlayer(Player player)
         {
-            if (_players.Any(x => x.Id == player.Id))
+            if (_players.Any(x => x.Name == player.Name))
                 throw new InvalidOperationException();
             if (_players.Count + 1 > _maxPlayerCount)
                 throw new InvalidOperationException();
@@ -36,7 +34,10 @@ namespace FeatureBan.Domain
 
         public Ticket StartProgressOnTicket(Ticket openTicket, Player player)
         {
-            _board.AssignTicket(openTicket, player.Id);
+            if (_players.All(x => x.Name != player.Name))
+                throw new InvalidOperationException();
+
+            _board.AssignTicket(openTicket, player.Name);
             _board.MoveTicketForward(openTicket);
 
             return openTicket;

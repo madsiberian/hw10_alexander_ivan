@@ -1,8 +1,8 @@
 ﻿using AutoFixture;
 using FeatureBan.Domain.Tests.DSL;
+using FluentAssertions;
 using System;
 using System.Linq;
-using FluentAssertions;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -52,7 +52,7 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
-        public void StartProgress_AssignsAndMovesTicket()
+        public void StartProgressOnTicket_AssignsAndMovesTicket()
         {
             var player = Fixture.Create<Player>();
             var game = Create.Game().WithPlayers(player).Please();
@@ -62,7 +62,28 @@ namespace FeatureBan.Domain.Tests
 
             Assert.Equal(openTicket.Name, ticketInWork.Name);
             Assert.Equal(Stage.WIP1, ticketInWork.Stage);
-            Assert.Equal(ticketInWork.Assignee, player.Id);
+            Assert.Equal(ticketInWork.Assignee, player.Name);
+        }
+
+        [Fact]
+        public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenTicketIsNotOpen()
+        {
+            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
+            var game = Create.Game().WithPlayers(players).Please();
+            var openTicket = game.GetOpenTickets().First();
+            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
+
+            Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(ticketInWork, players.Last()));
+        }
+
+        [Fact]
+        public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenPlayerNotInGame()
+        {
+            var player = Fixture.Create<Player>();
+            var game = Create.Game().Please();
+            var openTicket = game.GetOpenTickets().First();
+
+            Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(openTicket, player));
         }
     }
 }
