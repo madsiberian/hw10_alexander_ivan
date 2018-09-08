@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AutoFixture;
+using FeatureBan.Domain.Tests.DSL;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -32,12 +33,8 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void AddPlayer_ThrowsInvalidOperationException_WhenMaxPlayerCountExceeded()
         {
-            var game = new Game(maxPlayerCount: 3);
-            var players = Fixture.CreateMany<Player>().Take(3);
-            foreach (var player in players)
-            {
-                game.AddPlayer(player);
-            }
+            var players = Fixture.CreateMany<Player>().Take(3).ToArray();
+            var game = Create.Game().WithMaxPlayers(3).WithPlayers(players).Please();
 
             Assert.Throws<InvalidOperationException>(() => game.AddPlayer(new Player("extra player")));
         }

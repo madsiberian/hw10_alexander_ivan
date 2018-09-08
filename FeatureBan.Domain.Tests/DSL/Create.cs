@@ -10,5 +10,10 @@ namespace FeatureBan.Domain.Tests.DSL
         {
             return new TicketBuilder();
         }
+
+        public static GameBuilder Game()
+        {
+            return new GameBuilder();
+        }
     }
 }
