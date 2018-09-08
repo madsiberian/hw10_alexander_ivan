@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
+using AutoFixture;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
 {
-    public class GameTests
+    public class GameTests : TestBase
     {
         [Fact]
         public void AddPlayer_ThenCountOfPlayersShouldIncrement()
@@ -31,15 +33,13 @@ namespace FeatureBan.Domain.Tests
         public void AddPlayer_ThrowsInvalidOperationException_WhenMaxPlayerCountExceeded()
         {
             var game = new Game(maxPlayerCount: 3);
-            var player1 = new Player("a");
-            var player2 = new Player("b");
-            var player3 = new Player("c");
-            var player4 = new Player("d");
-            game.AddPlayer(player1);
-            game.AddPlayer(player2);
-            game.AddPlayer(player3);
+            var players = Fixture.CreateMany<Player>().Take(3);
+            foreach (var player in players)
+            {
+                game.AddPlayer(player);
+            }
 
-            Assert.Throws<InvalidOperationException>(() => game.AddPlayer(player4));
+            Assert.Throws<InvalidOperationException>(() => game.AddPlayer(new Player("extra player")));
         }
     }
 }
