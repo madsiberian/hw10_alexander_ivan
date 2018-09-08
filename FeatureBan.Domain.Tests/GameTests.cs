@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -17,6 +15,16 @@ namespace FeatureBan.Domain.Tests
             game.AddPlayer(player);
 
             Assert.Equal(countOfPlayersInGame + 1, game.CountOfPlayers);
+        }
+
+        [Fact]
+        public void AddPlayer_ThrowsInvalidOperationException_WhenPlayerIsAlredyInGame()
+        {
+            var game = new Game();
+            var player = new Player("foo");
+            game.AddPlayer(player);
+
+            Assert.Throws<InvalidOperationException>(() => game.AddPlayer(player));
         }
     }
 }

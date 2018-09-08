@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace FeatureBan.Domain
 {
@@ -12,6 +12,9 @@ namespace FeatureBan.Domain
 
         public void AddPlayer(Player player)
         {
+            if (_players.Any(x => x.Id == player.Id))
+                throw new InvalidOperationException();
+
             _players.Add(player);
         }
     }
