@@ -1,7 +1,7 @@
 using FeatureBan.Domain.Tests.DSL;
+using FluentAssertions;
 using System;
-using AutoFixture;
-using Moq;
+using System.Linq;
 using Xunit;
 
 namespace FeatureBan.Domain.Tests
@@ -11,15 +11,17 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void MoveTicketForward_ChangesTicketStageFromOpenToDev_WhenTicketIsOpen()
         {
-            var board = Create.Board().Please();
-            var openTicket = board.GetOpenTicket();
-            board.AssignTicket(openTicket, "some player");
+            var board = Create.Board().AsWritten(@"
+                | Open            | Dev | Test | Done |
+                |[Ticket > Player]|     |      |      |");
 
-            board.MoveTicketForward(openTicket);
-            var wipTicket = board.GetTicketByName(openTicket.Name);
+            var expectedBoard = Create.Board().AsWritten(@"
+                | Open | Dev             | Test | Done |
+                |      |[Ticket > Player]|      |      |");
 
-            Assert.Equal(openTicket.Name, wipTicket.Name);
-            Assert.Equal(Stage.Dev, wipTicket.Stage);
+            board.MoveTicketForward(board.OpenTickets.Single());
+
+            board.Should().BeEquivalentTo(expectedBoard);
         }
 
         [Fact]

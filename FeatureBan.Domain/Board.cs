@@ -14,6 +14,14 @@ namespace FeatureBan.Domain
             _ticketService = ticketService;
         }
 
+        public Board(List<Ticket> tickets, ITicketService ticketService)
+        {
+            _ticketService = ticketService;
+            _tickets = tickets.ToDictionary(x => x.Name);
+        }
+
+        public IEnumerable<Ticket> OpenTickets => _tickets.Where(t => t.Value.Stage == Stage.Open).Select(kv => kv.Value);
+
         public Ticket GetOpenTicket()
         {
             var ticket = _ticketService.CreateTicket();
