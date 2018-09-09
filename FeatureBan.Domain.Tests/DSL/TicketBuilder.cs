@@ -14,7 +14,6 @@ namespace FeatureBan.Domain.Tests.DSL
 
         public TicketBuilder Assigned()
         {
-            _ticket.IsAssigned = true;
             return this;
         }
 

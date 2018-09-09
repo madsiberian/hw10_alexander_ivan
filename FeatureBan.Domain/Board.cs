@@ -34,7 +34,7 @@ namespace FeatureBan.Domain
 
         public void MoveTicketForward(Ticket ticket)
         {
-            if (!ticket.IsAssigned)
+            if (ticket.AssigneeName == null)
                 throw new InvalidOperationException();
             if (ticket.IsBlocked)
                 throw new InvalidOperationException();
@@ -67,10 +67,9 @@ namespace FeatureBan.Domain
 
         public void AssignTicket(Ticket ticket, string playerId)
         {
-            if (ticket.IsAssigned)
+            if (ticket.AssigneeName != null)
                 throw new InvalidOperationException();
-
-            ticket.IsAssigned = true;
+            
             ticket.AssigneeName = playerId;
         }
 

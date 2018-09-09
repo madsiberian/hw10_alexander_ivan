@@ -52,7 +52,6 @@ namespace FeatureBan.Domain.Tests.DSL
             if (match.Groups["playerName"].Success)
             {
                 ticket.AssigneeName = match.Groups["playerName"].Value;
-                ticket.IsAssigned = true;
             }
 
             if (match.Groups["block"].Success)

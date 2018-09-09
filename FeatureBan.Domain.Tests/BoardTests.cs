@@ -40,7 +40,6 @@ namespace FeatureBan.Domain.Tests
                     AssigneeName = "Player",
                     Stage = Stage.Dev,
                     IsBlocked = false,
-                    IsAssigned = true
                 };
 
             board.TicketsInDev.Should().AllBeEquivalentTo(expectedTicket);
@@ -60,7 +59,6 @@ namespace FeatureBan.Domain.Tests
                     AssigneeName = "Player",
                     Stage = Stage.Test,
                     IsBlocked = false,
-                    IsAssigned = true
                 };
 
             board.TicketsInTest.Should().AllBeEquivalentTo(expectedTicket);
@@ -81,7 +79,6 @@ namespace FeatureBan.Domain.Tests
                     AssigneeName = "Player",
                     Stage = Stage.Done,
                     IsBlocked = false,
-                    IsAssigned = true
                 };
 
             board.DoneTickets.Should().AllBeEquivalentTo(expectedTicket);
