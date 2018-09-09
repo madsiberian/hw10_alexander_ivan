@@ -18,7 +18,10 @@ namespace FeatureBan.Domain.Tests.DSL
         public Board AsWritten(string definition)
         {
             var tickets = new List<Ticket>();
-            var lines = definition.Replace(" ", "").Split('\n').Skip(2);
+            var maxTickets = new Dictionary<Stage, int>();
+
+            var allLines = definition.Replace(" ", "").Split('\n');
+            var lines = allLines.Skip(2);
             foreach (var line in lines)
             {
                 var stages = line.Split('|').Skip(1).ToList();
@@ -34,9 +37,31 @@ namespace FeatureBan.Domain.Tests.DSL
                     tickets.Add(ticket);
                 }
             }
+
+            var stageHeaders = allLines[1].Split('|').Skip(1).Take(4).ToList();
+            for (int i = 0; i < stageHeaders.Count; ++i)
+            {
+                var maxTicketCount = GetMaxTicketsInStage(stageHeaders[i]);
+                if (maxTicketCount is null) continue;
+
+                maxTickets.Add((Stage)i, maxTicketCount.Value);
+            }
+
+
+
             var fakeTicketService = new Mock<ITicketService>();
             fakeTicketService.Setup(m => m.CreateTicket()).Returns(Create.Ticket().Please());
-            return new Board(tickets, fakeTicketService.Object);
+            return new Board(tickets, maxTickets, fakeTicketService.Object);
+        }
+
+        private int? GetMaxTicketsInStage(string stageHeader)
+        {
+            var regex = new Regex(@"(?<stageName>\w+)(<=(?<maxTicketCount>\d+))?");
+            var match = regex.Match(stageHeader);
+            if (!match.Success)
+                throw new ArgumentException($"{stageHeader} не распознано как описание заголовка stage");
+
+            return match.Groups["maxTicketCount"].Success ? int.Parse(match.Groups["maxTicketCount"].Value) : (int?) null;
         }
 
         private Ticket ParseTicketDef(string ticketDef)

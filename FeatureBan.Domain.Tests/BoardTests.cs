@@ -263,5 +263,27 @@ namespace FeatureBan.Domain.Tests
             board.Invoking(b => b.UnblockTicket(b.TicketsInDev.Single()))
                 .Should().Throw<InvalidOperationException>();
         }
+
+        [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenMovingTicketFromOpenAndDevStageIsFull()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open                 | Dev <= 1               | Test | Done |
+                |[MovedTicket > Player]|[TicketOnStage > Player]|      |      |");
+
+            board.Invoking(b => b.MoveTicketForward(b.OpenTickets.Single()))
+                .Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void MoveTicketForward_ThrowsInvalidOperationException_WhenMovingTicketFromDevAndTestStageIsFull()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                  | Test <= 1              | Done |
+                |      |[MovedTicket > Player]|[TicketOnStage > Player]|      |");
+
+            board.Invoking(b => b.MoveTicketForward(b.TicketsInDev.Single()))
+                .Should().Throw<InvalidOperationException>();
+        }
     }
 }

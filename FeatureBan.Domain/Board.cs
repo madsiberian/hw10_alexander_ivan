@@ -8,15 +8,17 @@ namespace FeatureBan.Domain
     {
         private readonly IDictionary<string, Ticket> _tickets = new Dictionary<string, Ticket>();
         private readonly ITicketService _ticketService;
+        private readonly IReadOnlyDictionary<Stage, int> _maxTickets = new Dictionary<Stage, int>();
 
         public Board(ITicketService ticketService)
         {
             _ticketService = ticketService;
         }
 
-        public Board(List<Ticket> tickets, ITicketService ticketService)
+        public Board(List<Ticket> tickets, IReadOnlyDictionary<Stage, int> maxTickets, ITicketService ticketService)
         {
             _ticketService = ticketService;
+            _maxTickets = maxTickets;
             _tickets = tickets.ToDictionary(x => x.Name);
         }
 
@@ -35,13 +37,18 @@ namespace FeatureBan.Domain
         public void MoveTicketForward(Ticket ticket)
         {
             if (ticket.AssigneeName == null)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
             if (ticket.IsBlocked)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} блокирован");
             if (ticket.Stage == Stage.Done)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Нельзя двигать уже завершённый тикет {ticket.Name}");
 
-            ticket.Stage = GetNextStage(ticket.Stage);
+            var nextStage = GetNextStage(ticket.Stage);
+            if (_maxTickets.ContainsKey(nextStage) && _tickets.Count(t => t.Value.Stage == nextStage) >= _maxTickets[nextStage])
+                throw new InvalidOperationException($"Стадия {nextStage.ToString()} уже заполнена");
+
+            ticket.Stage = nextStage;
+
             _tickets[ticket.Name] = ticket;
         }
 
