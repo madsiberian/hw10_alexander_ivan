@@ -143,109 +143,128 @@ namespace FeatureBan.Domain.Tests
                 | Open | Dev | Test | Done             |
                 |      |     |      |[Ticket > Player] |");
 
-            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(board.DoneTickets.Single()));
+            board.Invoking(b => b.MoveTicketForward(b.DoneTickets.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsNotAssigned()
         {
-            var board = Create.Board().Please();
-            var unassignedTicket = board.GetOpenTicket();
+            var board = Create.Board().AsWritten(@"
+                | Open   | Dev | Test | Done |
+                |[Ticket]|     |      |      |");
 
-            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(unassignedTicket));
+            board.Invoking(b => b.MoveTicketForward(b.OpenTickets.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsBlocked()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Blocked().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                | Test | Done |
+                |      |[Ticket > Player !B]|      |      |");
 
-            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(ticket));
+            board.Invoking(b => b.MoveTicketForward(b.TicketsInDev.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void AssignTicket_SetsIsAssignedToTrue()
+        public void AssignTicket_SetsAssigneeName()
         {
-            var board = Create.Board().Please();
-            var unassignedTicket = board.GetOpenTicket();
+            var board = Create.Board().AsWritten(@"
+                | Open   | Dev | Test | Done |
+                |[Ticket]|     |      |      |");
 
-            board.AssignTicket(unassignedTicket, "some player");
-            var assignedTicket = board.GetTicketByName(unassignedTicket.Name);
+            board.AssignTicket(board.OpenTickets.Single(), "some player");
 
-            Assert.True(assignedTicket.IsAssigned);
-            Assert.Equal(unassignedTicket.Name, assignedTicket.Name);
+            board.OpenTickets.Single().AssigneeName.Should().Be("some player");
         }
 
         [Fact]
         public void AssignTicket_ThrowsInvalidOperationException_WhenTicketIsAlreadyAssigned()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open            | Dev | Test | Done |
+                |[Ticket > Player]|     |      |      |");
 
-            Assert.Throws<InvalidOperationException>(() => board.AssignTicket(ticket, "some player"));
+            board.Invoking(b => b.AssignTicket(b.OpenTickets.Single(), "OtherPlayer"))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void BlockTicket_SetsIsBlockedToTrue()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                | Test | Done |
+                |      |[Ticket > Player   ]|      |      |");
 
-            board.BlockTicket(ticket);
+            var expectedBoard = Create.Board().AsWritten(@"
+                | Open | Dev                | Test | Done |
+                |      |[Ticket > Player !B]|      |      |");
 
-            Assert.True(ticket.IsBlocked);
+            board.BlockTicket(board.TicketsInDev.Single());
+
+            board.Should().BeEquivalentTo(expectedBoard);
         }
 
         [Fact]
         public void BlockTicket_ThrowsInvalidOperationException_WhenTicketIsOpen()
         {
-            var board = Create.Board().Please();
-            var openTicket = board.GetOpenTicket();
+            var board = Create.Board().AsWritten(@"
+                | Open            | Dev | Test | Done |
+                |[Ticket > Player]|     |      |      |");
 
-            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(openTicket));
+            board.Invoking(b => b.BlockTicket(b.OpenTickets.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void BlockTicket_ThrowsInvalidOperationException_WhenTicketIsDone()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.Done).Assigned().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev | Test | Done             |
+                |      |     |      |[Ticket > Player] |");
 
-            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
+            board.Invoking(b => b.BlockTicket(b.DoneTickets.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void BlockTicket_ThrowsInvalidOperationException_IfWeTryBlockAgain()
         {
-            var board = Create.Board().Please();
-            var ticket = board.GetOpenTicket();
-            board.AssignTicket(ticket, "some player");
-            board.MoveTicketForward(ticket);
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                 | Test | Done |
+                |      |[Ticket > Player !B] |      |      |");
 
-            board.BlockTicket(ticket);
-
-            Assert.Throws<InvalidOperationException>(() => board.BlockTicket(ticket));
+            board.Invoking(b => b.BlockTicket(b.TicketsInDev.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void UnblockTicket_SetsIsBlockedToFalse()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Blocked().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                 | Test | Done |
+                |      |[Ticket > Player !B] |      |      |");
+            var expectedBoard = Create.Board().AsWritten(@"
+                | Open | Dev                 | Test | Done |
+                |      |[Ticket > Player   ] |      |      |");
 
-            board.UnblockTicket(ticket);
+            board.UnblockTicket(board.TicketsInDev.Single());
 
-            Assert.False(ticket.IsBlocked);
+            board.Should().BeEquivalentTo(expectedBoard);
         }
 
         [Fact]
         public void UnblockTicket_ThrowsInvalidOperationException_WhenTicketIsNotBlocked()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev              | Test | Done |
+                |      |[Ticket > Player] |      |      |");
 
-            Assert.Throws<InvalidOperationException>(() => board.UnblockTicket(ticket));
+            board.Invoking(b => b.UnblockTicket(b.TicketsInDev.Single()))
+                .Should().Throw<InvalidOperationException>();
         }
     }
 }
