@@ -9,6 +9,86 @@ namespace FeatureBan.Domain.Tests
     public class BoardTests : TestBase
     {
         [Fact]
+        public void OpenTickets_ReturnsOneOpenTicket_WhenBoardCreatedWithOneOpenTicket()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open   | Dev | Test | Done |
+                |[Ticket]|     |      |      |");
+
+            Ticket expectedTicket =
+                new Ticket
+                {
+                    Name = "Ticket",
+                    Stage = Stage.Open,
+                    IsBlocked = false
+                };
+
+            board.OpenTickets.Should().AllBeEquivalentTo(expectedTicket);
+            board.OpenTickets.Count().Should().Be(1);
+        }
+        [Fact]
+        public void TicketsInDev_ReturnsOneTicketInDev_WhenBoardCreatedWithOneTicketInDev()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev             | Test | Done |
+                |      |[Ticket > Player]|      |      |");
+
+            Ticket expectedTicket =
+                new Ticket
+                {
+                    Name = "Ticket",
+                    AssigneeName = "Player",
+                    Stage = Stage.Dev,
+                    IsBlocked = false,
+                    IsAssigned = true
+                };
+
+            board.TicketsInDev.Should().AllBeEquivalentTo(expectedTicket);
+            board.TicketsInDev.Count().Should().Be(1);
+        }
+        [Fact]
+        public void TicketsInTest_ReturnsOneTicketInTest_WhenBoardCreatedWithOneTicketInTest()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev | Test            | Done |
+                |      |     |[Ticket > Player]|      |");
+
+            Ticket expectedTicket =
+                new Ticket
+                {
+                    Name = "Ticket",
+                    AssigneeName = "Player",
+                    Stage = Stage.Test,
+                    IsBlocked = false,
+                    IsAssigned = true
+                };
+
+            board.TicketsInTest.Should().AllBeEquivalentTo(expectedTicket);
+            board.TicketsInTest.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public void DoneTickets_ReturnsOneDoneTicket_WhenBoardCreatedWithOneDoneTicket()
+        {
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev | Test | Done            |
+                |      |     |      |[Ticket > Player]|");
+
+            Ticket expectedTicket =
+                new Ticket
+                {
+                    Name = "Ticket",
+                    AssigneeName = "Player",
+                    Stage = Stage.Done,
+                    IsBlocked = false,
+                    IsAssigned = true
+                };
+
+            board.DoneTickets.Should().AllBeEquivalentTo(expectedTicket);
+            board.DoneTickets.Count().Should().Be(1);
+        }
+
+        [Fact]
         public void MoveTicketForward_ChangesTicketStageFromOpenToDev_WhenTicketIsOpen()
         {
             var board = Create.Board().AsWritten(@"
@@ -27,36 +107,43 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void MoveTicketForward_ChangesTicketStageFromDevToTest_WhenTicketIsDev()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().OnStage(Stage.Dev).Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev             | Test | Done |
+                |      |[Ticket > Player]|      |      |");
 
-            board.MoveTicketForward(ticket);
-            var TestTicket = board.GetTicketByName(ticket.Name);
+            var expectedBoard = Create.Board().AsWritten(@"
+                | Open | Dev | Test            | Done |
+                |      |     |[Ticket > Player]|      |");
 
-            Assert.Equal(ticket.Name, TestTicket.Name);
-            Assert.Equal(Stage.Test, TestTicket.Stage);
+            board.MoveTicketForward(board.TicketsInDev.Single());
+
+            board.Should().BeEquivalentTo(expectedBoard);
         }
 
         [Fact]
         public void MoveTicketForward_ChangesTicketStageFromTestToDone_WhenTicketIsTest()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().OnStage(Stage.Test).Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev | Test             | Done |
+                |      |     |[Ticket > Player] |      |");
 
-            board.MoveTicketForward(ticket);
-            var doneTicket = board.GetTicketByName(ticket.Name);
+            var expectedBoard = Create.Board().AsWritten(@"
+                | Open | Dev | Test | Done             |
+                |      |     |      |[Ticket > Player] |");
 
-            Assert.Equal(ticket.Name, doneTicket.Name);
-            Assert.Equal(Stage.Done, doneTicket.Stage);
+            board.MoveTicketForward(board.TicketsInTest.Single());
+
+            board.Should().BeEquivalentTo(expectedBoard);
         }
 
         [Fact]
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsDone()
         {
-            var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().OnStage(Stage.Done).Please();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev | Test | Done             |
+                |      |     |      |[Ticket > Player] |");
 
-            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(ticket));
+            Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(board.DoneTickets.Single()));
         }
 
         [Fact]

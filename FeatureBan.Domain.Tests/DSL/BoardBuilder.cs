@@ -41,7 +41,7 @@ namespace FeatureBan.Domain.Tests.DSL
 
         private Ticket ParseTicketDef(string ticketDef)
         {
-            var regex = new Regex(@"\[(?<ticketName>\w+)(>(?<playerName>\w+(?<block>\!B)?)?)\]");
+            var regex = new Regex(@"\[(?<ticketName>\w+)(>(?<playerName>\w+)(?<block>\!B)?)?\]");
             var match = regex.Match(ticketDef);
             if (!match.Success)
                 throw new ArgumentException($"{ticketDef} не распознано как тикет");
@@ -51,7 +51,7 @@ namespace FeatureBan.Domain.Tests.DSL
             
             if (match.Groups["playerName"].Success)
             {
-                ticket.AssigneeName = match.Groups["ticketName"].Value;
+                ticket.AssigneeName = match.Groups["playerName"].Value;
                 ticket.IsAssigned = true;
             }
 

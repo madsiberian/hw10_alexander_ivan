@@ -21,6 +21,9 @@ namespace FeatureBan.Domain
         }
 
         public IEnumerable<Ticket> OpenTickets => _tickets.Where(t => t.Value.Stage == Stage.Open).Select(kv => kv.Value);
+        public IEnumerable<Ticket> TicketsInDev => _tickets.Where(t => t.Value.Stage == Stage.Dev).Select(kv => kv.Value);
+        public IEnumerable<Ticket> TicketsInTest => _tickets.Where(t => t.Value.Stage == Stage.Test).Select(kv => kv.Value);
+        public IEnumerable<Ticket> DoneTickets => _tickets.Where(t => t.Value.Stage == Stage.Done).Select(kv => kv.Value);
 
         public Ticket GetOpenTicket()
         {
