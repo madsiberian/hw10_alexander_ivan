@@ -58,7 +58,7 @@ namespace FeatureBan.Domain
         {
             _board.BlockTicket(ticket);
 
-            var assignedTicket = _board.GetOpenTicket();
+            var assignedTicket = _board.OpenTickets.First();
             _board.AssignTicket(assignedTicket, player.Name);
 
             return assignedTicket;
