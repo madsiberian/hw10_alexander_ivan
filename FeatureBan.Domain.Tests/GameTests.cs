@@ -63,7 +63,7 @@ namespace FeatureBan.Domain.Tests
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
             Assert.Equal(openTicket.Name, ticketInWork.Name);
-            Assert.Equal(Stage.WIP1, ticketInWork.Stage);
+            Assert.Equal(Stage.Dev, ticketInWork.Stage);
             Assert.Equal(ticketInWork.AssigneeName, player.Name);
         }
 
@@ -90,7 +90,7 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
-        public void MoveTicketForward_ChangesTicketStageToWip2_WhenTicketStageIsWip1()
+        public void MoveTicketForward_ChangesTicketStageToTest_WhenTicketStageIsDev()
         {
             var player = Fixture.Create<Player>();
             var board = Create.Board().Please();
@@ -98,22 +98,22 @@ namespace FeatureBan.Domain.Tests
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
 
-            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+            var TestTicket = game.MoveTicketForward(ticketInWork, player);
 
-            wip2Ticket.Stage.Should().Be(Stage.WIP2);
+            TestTicket.Stage.Should().Be(Stage.Test);
         }
 
         [Fact]
-        public void MoveTicketForward_ChangesTicketStageToDone_WhenTicketStageIsWip2()
+        public void MoveTicketForward_ChangesTicketStageToDone_WhenTicketStageIsTest()
         {
             var player = Fixture.Create<Player>();
             var board = Create.Board().Please();
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
+            var TestTicket = game.MoveTicketForward(ticketInWork, player);
 
-            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
+            var doneTicket = game.MoveTicketForward(TestTicket, player);
 
             doneTicket.Stage.Should().Be(Stage.Done);
         }
@@ -126,8 +126,8 @@ namespace FeatureBan.Domain.Tests
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
             var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            var wip2Ticket = game.MoveTicketForward(ticketInWork, player);
-            var doneTicket = game.MoveTicketForward(wip2Ticket, player);
+            var TestTicket = game.MoveTicketForward(ticketInWork, player);
+            var doneTicket = game.MoveTicketForward(TestTicket, player);
 
             Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(doneTicket, player));
         }

@@ -9,7 +9,7 @@ namespace FeatureBan.Domain.Tests
     public class BoardTests : TestBase
     {
         [Fact]
-        public void MoveTicketForward_ChangesTicketStageFromOpenToWip1_WhenTicketIsOpen()
+        public void MoveTicketForward_ChangesTicketStageFromOpenToDev_WhenTicketIsOpen()
         {
             var board = Create.Board().Please();
             var openTicket = board.GetOpenTicket();
@@ -19,27 +19,27 @@ namespace FeatureBan.Domain.Tests
             var wipTicket = board.GetTicketByName(openTicket.Name);
 
             Assert.Equal(openTicket.Name, wipTicket.Name);
-            Assert.Equal(Stage.WIP1, wipTicket.Stage);
+            Assert.Equal(Stage.Dev, wipTicket.Stage);
         }
 
         [Fact]
-        public void MoveTicketForward_ChangesTicketStageFromWip1ToWip2_WhenTicketIsWIp1()
+        public void MoveTicketForward_ChangesTicketStageFromDevToTest_WhenTicketIsDev()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().OnStage(Stage.WIP1).Please();
+            var ticket = Create.Ticket().Assigned().OnStage(Stage.Dev).Please();
 
             board.MoveTicketForward(ticket);
-            var wip2Ticket = board.GetTicketByName(ticket.Name);
+            var TestTicket = board.GetTicketByName(ticket.Name);
 
-            Assert.Equal(ticket.Name, wip2Ticket.Name);
-            Assert.Equal(Stage.WIP2, wip2Ticket.Stage);
+            Assert.Equal(ticket.Name, TestTicket.Name);
+            Assert.Equal(Stage.Test, TestTicket.Stage);
         }
 
         [Fact]
-        public void MoveTicketForward_ChangesTicketStageFromWip2ToDone_WhenTicketIsWIp2()
+        public void MoveTicketForward_ChangesTicketStageFromTestToDone_WhenTicketIsTest()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().Assigned().OnStage(Stage.WIP2).Please();
+            var ticket = Create.Ticket().Assigned().OnStage(Stage.Test).Please();
 
             board.MoveTicketForward(ticket);
             var doneTicket = board.GetTicketByName(ticket.Name);
@@ -70,7 +70,7 @@ namespace FeatureBan.Domain.Tests
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsBlocked()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Blocked().Please();
+            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Blocked().Please();
 
             Assert.Throws<InvalidOperationException>(() => board.MoveTicketForward(ticket));
         }
@@ -101,7 +101,7 @@ namespace FeatureBan.Domain.Tests
         public void BlockTicket_SetsIsBlockedToTrue()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Please();
+            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Please();
 
             board.BlockTicket(ticket);
 
@@ -143,7 +143,7 @@ namespace FeatureBan.Domain.Tests
         public void UnblockTicket_SetsIsBlockedToFalse()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Blocked().Please();
+            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Blocked().Please();
 
             board.UnblockTicket(ticket);
 
@@ -154,7 +154,7 @@ namespace FeatureBan.Domain.Tests
         public void UnblockTicket_ThrowsInvalidOperationException_WhenTicketIsNotBlocked()
         {
             var board = Create.Board().Please();
-            var ticket = Create.Ticket().OnStage(Stage.WIP1).Assigned().Please();
+            var ticket = Create.Ticket().OnStage(Stage.Dev).Assigned().Please();
 
             Assert.Throws<InvalidOperationException>(() => board.UnblockTicket(ticket));
         }

@@ -39,10 +39,10 @@ namespace FeatureBan.Domain
             switch (ticketStage)
             {
                 case Stage.Open:
-                    return Stage.WIP1;
-                case Stage.WIP1:
-                    return Stage.WIP2;
-                case Stage.WIP2:
+                    return Stage.Dev;
+                case Stage.Dev:
+                    return Stage.Test;
+                case Stage.Test:
                     return Stage.Done;
                 default:
                     throw new ArgumentException();
