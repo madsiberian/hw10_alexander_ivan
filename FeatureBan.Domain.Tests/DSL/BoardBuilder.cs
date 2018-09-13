@@ -8,13 +8,6 @@ namespace FeatureBan.Domain.Tests.DSL
 {
     public class BoardBuilder
     {
-        public Board Please()
-        {
-            var fakeTicketService = new Mock<ITicketService>();
-            fakeTicketService.Setup(m => m.CreateTicket()).Returns(Create.Ticket().Please());
-            return new Board();
-        }
-
         public Board AsWritten(string definition)
         {
             var tickets = new List<Ticket>();

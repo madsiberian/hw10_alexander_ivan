@@ -9,10 +9,6 @@ namespace FeatureBan.Domain
         private readonly IDictionary<string, Ticket> _tickets = new Dictionary<string, Ticket>();
         private readonly IReadOnlyDictionary<Stage, int> _maxTickets = new Dictionary<Stage, int>();
 
-        public Board()
-        {
-        }
-
         public Board(List<Ticket> tickets, IReadOnlyDictionary<Stage, int> maxTickets)
         {
             _maxTickets = maxTickets;
