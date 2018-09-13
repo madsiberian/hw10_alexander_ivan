@@ -6,8 +6,8 @@ namespace FeatureBan.Domain
 {
     public class Board : IBoard
     {
-        private readonly IDictionary<string, Ticket> _tickets = new Dictionary<string, Ticket>();
-        private readonly IReadOnlyDictionary<Stage, int> _maxTickets = new Dictionary<Stage, int>();
+        private readonly IDictionary<string, Ticket> _tickets;
+        private readonly IReadOnlyDictionary<Stage, int> _maxTickets;
 
         public Board(List<Ticket> tickets, IReadOnlyDictionary<Stage, int> maxTickets)
         {
@@ -49,7 +49,7 @@ namespace FeatureBan.Domain
                 case Stage.Test:
                     return Stage.Done;
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException($"Неизвестная стадия {ticketStage}");
             }
         }
 
@@ -61,7 +61,7 @@ namespace FeatureBan.Domain
         public void AssignTicket(Ticket ticket, string playerId)
         {
             if (ticket.AssigneeName != null)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
             
             ticket.AssigneeName = playerId;
         }
@@ -69,10 +69,10 @@ namespace FeatureBan.Domain
         public void BlockTicket(Ticket ticket)
         {
             if (ticket.IsBlocked)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} блокирован");
 
             if (ticket.Stage == Stage.Open || ticket.Stage == Stage.Done)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Нельзя блокировать тикет {ticket.Name} на стадии {ticket.Stage}");
 
             ticket.IsBlocked = true;
         }
@@ -80,7 +80,7 @@ namespace FeatureBan.Domain
         public void UnblockTicket(Ticket ticket)
         {
             if (!ticket.IsBlocked)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} не блокирован");
 
             ticket.IsBlocked = false;
         }
