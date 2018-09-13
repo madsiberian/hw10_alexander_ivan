@@ -7,17 +7,14 @@ namespace FeatureBan.Domain
     public class Board : IBoard
     {
         private readonly IDictionary<string, Ticket> _tickets = new Dictionary<string, Ticket>();
-        private readonly ITicketService _ticketService;
         private readonly IReadOnlyDictionary<Stage, int> _maxTickets = new Dictionary<Stage, int>();
 
-        public Board(ITicketService ticketService)
+        public Board()
         {
-            _ticketService = ticketService;
         }
 
-        public Board(List<Ticket> tickets, IReadOnlyDictionary<Stage, int> maxTickets, ITicketService ticketService)
+        public Board(List<Ticket> tickets, IReadOnlyDictionary<Stage, int> maxTickets)
         {
-            _ticketService = ticketService;
             _maxTickets = maxTickets;
             _tickets = tickets.ToDictionary(x => x.Name);
         }

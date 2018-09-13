@@ -12,7 +12,7 @@ namespace FeatureBan.Domain.Tests.DSL
         {
             var fakeTicketService = new Mock<ITicketService>();
             fakeTicketService.Setup(m => m.CreateTicket()).Returns(Create.Ticket().Please());
-            return new Board(fakeTicketService.Object);
+            return new Board();
         }
 
         public Board AsWritten(string definition)
@@ -51,7 +51,7 @@ namespace FeatureBan.Domain.Tests.DSL
 
             var fakeTicketService = new Mock<ITicketService>();
             fakeTicketService.Setup(m => m.CreateTicket()).Returns(Create.Ticket().Please());
-            return new Board(tickets, maxTickets, fakeTicketService.Object);
+            return new Board(tickets, maxTickets);
         }
 
         private int? GetMaxTicketsInStage(string stageHeader)
