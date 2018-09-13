@@ -17,7 +17,7 @@ namespace FeatureBan.Domain.Tests.DSL
             var lines = allLines.Skip(2);
             foreach (var line in lines)
             {
-                var stages = line.Split('|').Skip(1).ToList();
+                var stages = line.Split('|').Skip(1).Take(4).ToList();
                 for (int i = 0; i < stages.Count; ++i)
                 {
                     var ticketDef = stages[i];

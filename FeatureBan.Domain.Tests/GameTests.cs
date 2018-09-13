@@ -2,6 +2,7 @@
 using FeatureBan.Domain.Tests.DSL;
 using FluentAssertions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -43,12 +44,20 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void GetOpenTickets_ReturnsOpenTickets()
         {
-            var game = Create.Game().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open        | Dev                | Test | Done                |
+                |[OpenTicket1]|[DevTicket > Player]|      |                     |
+                |[OpenTicket2]|                    |      |[DoneTicket > Player]|");
+            var game = Create.Game().WithBoard(board).Please();
+            var expectedOpenTickets = new List<Ticket>
+            {
+                new Ticket {Name = "OpenTicket1", Stage = Stage.Open},
+                new Ticket {Name = "OpenTicket2", Stage = Stage.Open}
+            };
 
             var tickets = game.GetOpenTickets();
 
-            tickets.Should().NotBeEmpty();
-            tickets.Should().NotContain(t => t.Stage != Stage.Open);
+            tickets.Should().BeEquivalentTo(expectedOpenTickets);
         }
 
         [Fact]
@@ -85,7 +94,10 @@ namespace FeatureBan.Domain.Tests
         public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenPlayerNotInGame()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open   | Dev | Test | Done |
+                |[Ticket]|     |      |      |");
+            var game = Create.Game().WithBoard(board).Please();
             var openTicket = game.GetOpenTickets().First();
 
             Assert.Throws<InvalidOperationException>(() => game.StartProgressOnTicket(openTicket, player));
@@ -95,7 +107,11 @@ namespace FeatureBan.Domain.Tests
         public void StartProgressOnTicket_ThrowsInvalidOperationException_WhenPlayerMadeHisMove()
         {
             var player = Fixture.Create<Player>();
-            var game = Create.Game().WithPlayers(player).WithFakeBoard().Please();
+            var board = Create.Board().AsWritten(@"
+                | Open        | Dev | Test | Done |
+                |[FirstTicket]|     |      |      |
+                |[LastTicket] |     |      |      |");
+            var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
             var openTickets = game.GetOpenTickets().Take(2).ToArray();
             game.StartProgressOnTicket(openTickets.First(), player);
 

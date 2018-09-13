@@ -31,7 +31,7 @@ namespace FeatureBan.Domain
 
         public IReadOnlyList<Ticket> GetOpenTickets()
         {
-            return new List<Ticket>{new Ticket() { Name = "ticket name" }};
+            return _board.OpenTickets.ToList();
         }
 
         public Ticket StartProgressOnTicket(Ticket openTicket, Player player)
