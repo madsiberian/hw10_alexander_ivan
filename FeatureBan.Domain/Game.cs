@@ -47,7 +47,7 @@ namespace FeatureBan.Domain
         public Ticket MoveTicketForward(Ticket ticket, Player player)
         {
             if (ticket.AssigneeName != player.Name)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
 
             _board.MoveTicketForward(ticket);
 
@@ -56,6 +56,9 @@ namespace FeatureBan.Domain
 
         public Ticket BlockTicketAndGetNew(Ticket ticket, Player player)
         {
+            if (ticket.AssigneeName != player.Name)
+                throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
+
             _board.BlockTicket(ticket);
 
             var assignedTicket = _board.OpenTickets.First();
@@ -67,10 +70,10 @@ namespace FeatureBan.Domain
         public Ticket UnblockTicket(Ticket ticket, Player player)
         {
             if (ticket.AssigneeName != player.Name)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Тикет {ticket.Name} назначен другому игроку ({ticket.AssigneeName})");
 
             _board.UnblockTicket(ticket);
-            return ticket;
+            return _board.GetTicketByName(ticket.Name);
         }
     }
 }

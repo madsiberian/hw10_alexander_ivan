@@ -147,12 +147,12 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void MoveTicketForward_ThrowsInvalidOperationException_WhenTicketIsBlocked()
         {
-            var player = Fixture.Create<Player>();
-            var board = Create.Board().Please();
+            var player = new Player("Player");
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                | Test | Done |
+                |      |[Ticket > Player !B]|      |      |");
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            game.BlockTicketAndGetNew(ticketInWork, player);
+            var ticketInWork = board.TicketsInDev.Single();
 
             Assert.Throws<InvalidOperationException>(() => game.MoveTicketForward(ticketInWork, player));
         }
@@ -160,11 +160,12 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void BlockTicketAndGetNew_BlocksTicketAndAssignsNewTicket()
         {
-            var player = Fixture.Create<Player>();
-            var board = Create.Board().Please();
+            var player = new Player("Player");
+            var board = Create.Board().AsWritten(@"
+                | Open         | Dev             | Test | Done |
+                | [OpenTicket] |[Ticket > Player]|      |      |");
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
+            var ticketInWork = board.TicketsInDev.Single();
 
             var assignedTicket = game.BlockTicketAndGetNew(ticketInWork, player);
 
@@ -177,12 +178,12 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void BlockTicketAndGetNew_ThrowsInvalidOperationException_WhenTicketIsBlocked()
         {
-            var player = Fixture.Create<Player>();
-            var board = Create.Board().Please();
+            var player = new Player("Player");
+            var board = Create.Board().AsWritten(@"
+                | Open         | Dev                | Test | Done |
+                | [OpenTicket] |[Ticket > Player !B]|      |      |");
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            game.BlockTicketAndGetNew(ticketInWork, player);
+            var ticketInWork = board.TicketsInDev.Single();
 
             Assert.Throws<InvalidOperationException>(() => game.BlockTicketAndGetNew(ticketInWork, player));
         }
@@ -190,29 +191,31 @@ namespace FeatureBan.Domain.Tests
         [Fact]
         public void BlockTicketAndGetNew_ThrowsInvalidOperationException_WhenTicketIsAssignedToOtherPlayer()
         {
-            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
-            var board = Create.Board().Please();
+            var players = new[] {new Player("FirstPlayer"), new Player("OtherPlayer")};
+            var firstPlayer = players.First();
+            var board = Create.Board().AsWritten(@"
+                | Open         | Dev                  | Test | Done |
+                | [OpenTicket] |[Ticket > OtherPlayer]|      |      |");
             var game = Create.Game().WithPlayers(players).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
-            game.BlockTicketAndGetNew(ticketInWork, players.First());
+            var ticketInWork = board.TicketsInDev.Single();
 
-            Assert.Throws<InvalidOperationException>(() => game.BlockTicketAndGetNew(ticketInWork, players.Last()));
+            Assert.Throws<InvalidOperationException>(() => game.BlockTicketAndGetNew(ticketInWork, firstPlayer));
         }
 
         [Fact]
         public void UnblockTicket()
         {
-            var player = Fixture.Create<Player>();
-            var board = Create.Board().Please();
+            var player = new Player("Player");
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                | Test | Done |
+                |      |[Ticket > Player !B]|      |      |");
             var game = Create.Game().WithPlayers(player).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, player);
-            game.BlockTicketAndGetNew(ticketInWork, player);
+            var ticketInWork = board.TicketsInDev.Single();
 
             var unblockedTicket = game.UnblockTicket(ticketInWork, player);
 
-            unblockedTicket.Should().BeEquivalentTo(ticketInWork);
+            unblockedTicket.Should().BeEquivalentTo(ticketInWork, o => o.Excluding(t => t.IsBlocked));
+            unblockedTicket.IsBlocked.Should().BeFalse();
         }
 
         [Fact]
@@ -228,16 +231,17 @@ namespace FeatureBan.Domain.Tests
         }
 
         [Fact]
-        public void UnblockTicket_ThrowInvalidOperation_WhenAnotherPlayerTryUnblockTicket()
+        public void UnblockTicket_ThrowInvalidOperation_WhenTicketIsAssignedToOtherPlayer()
         {
-            var players = Fixture.CreateMany<Player>().Take(2).ToArray();
-            var board = Create.Board().Please();
+            var players = new[] { new Player("FirstPlayer"), new Player("OtherPlayer") };
+            var firstPlayer = players.First();
+            var board = Create.Board().AsWritten(@"
+                | Open | Dev                     | Test | Done |
+                |      |[Ticket > OtherPlayer !B]|      |      |");
             var game = Create.Game().WithPlayers(players).WithBoard(board).Please();
-            var openTicket = game.GetOpenTickets().First();
-            var ticketInWork = game.StartProgressOnTicket(openTicket, players.First());
-            game.BlockTicketAndGetNew(ticketInWork, players.First());
+            var ticketInWork = board.TicketsInDev.First();
 
-            Assert.Throws<InvalidOperationException>(() => game.UnblockTicket(ticketInWork, players.Last()));
+            Assert.Throws<InvalidOperationException>(() => game.UnblockTicket(ticketInWork, firstPlayer));
         }
     }
 }
